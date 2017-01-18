@@ -6,7 +6,6 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
@@ -57,6 +56,7 @@ public class PieChartView extends View {
         return paint;
     }
 
+    //设置颜色
     public void setColorList(List<Integer> colorList) {
         if (colorList == null || colorList.size() == 0) {
             return;
@@ -73,6 +73,7 @@ public class PieChartView extends View {
             return;
         }
         this.dataList = dataList;
+        //赋最大值
         max = 0;
         for (Integer integer : this.dataList) {
             max += integer;
@@ -82,8 +83,6 @@ public class PieChartView extends View {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 //        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        Log.i(MainActivity.TAG, "widthMeasureSpec: " + widthMeasureSpec);
-        Log.i(MainActivity.TAG, "heightMeasureSpec: " + heightMeasureSpec);
         int width = measureValue(getSuggestedMinimumWidth(), widthMeasureSpec);
         int height = measureValue(getSuggestedMinimumHeight(), heightMeasureSpec);
         setMeasuredDimension(width, height);
@@ -92,10 +91,10 @@ public class PieChartView extends View {
     private int measureValue(int minSize, int measureSpec) {
         int mode = MeasureSpec.getMode(measureSpec);
         int size = MeasureSpec.getSize(measureSpec);
-        int result = 0;
+        int result;
         if (mode == MeasureSpec.EXACTLY) {//固定值或者match_parent
             result = size;
-        } else if (mode == MeasureSpec.AT_MOST) {
+        } else if (mode == MeasureSpec.AT_MOST) {//wrap_content
             result = Math.min(minSize, size);
         } else {
             result = minSize;
@@ -106,23 +105,9 @@ public class PieChartView extends View {
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
-        Log.i(MainActivity.TAG, "w: " + w);
-        Log.i(MainActivity.TAG, "h: " + h);
-        Log.i(MainActivity.TAG, "oldw: " + oldw);
-        Log.i(MainActivity.TAG, "oldh: " + oldh);
         circleX = w / 2;
         circleY = h / 2;
         radius = circleX - 10;//半径赋值
-    }
-
-    @Override
-    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        super.onLayout(changed, left, top, right, bottom);
-        Log.i(MainActivity.TAG, "onLayout: ------------------------------------------------------");
-        Log.i(MainActivity.TAG, "left: " + left);
-        Log.i(MainActivity.TAG, "top: " + top);
-        Log.i(MainActivity.TAG, "right: " + right);
-        Log.i(MainActivity.TAG, "bottom: " + bottom);
     }
 
     @Override
@@ -130,8 +115,6 @@ public class PieChartView extends View {
         super.onDraw(canvas);
         //画圆
         canvas.drawCircle(circleX, circleY, radius, circlePaint);
-        //画弧
-        RectF rectF = new RectF(circleX - radius, circleY - radius, circleX + radius, circleY + radius);
 
         if (dataList == null || dataList.size() == 0) {
             Toast.makeText(getContext(), "数据不能空", Toast.LENGTH_SHORT).show();
@@ -143,11 +126,13 @@ public class PieChartView extends View {
             return;
         }
 
+        //画弧
+        RectF rectF = new RectF(circleX - radius, circleY - radius, circleX + radius, circleY + radius);
         float startAngle = 0;
         for (int i = 0; i < dataList.size(); i++) {
-            int sweepAngle = dataList.get(i) * 360 / max;
+            int sweepAngle = dataList.get(i) * 360 / max;//扫过的弧度
             canvas.drawArc(rectF, startAngle, sweepAngle, true, list.get(i % list.size()));
-            startAngle += sweepAngle;
+            startAngle += sweepAngle;//开始角度
         }
     }
 }
